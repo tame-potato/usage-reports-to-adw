@@ -32,6 +32,7 @@ import os
 import argparse
 import datetime
 import oci
+import oci_utils
 import sys
 import shutil
 import base64
@@ -75,43 +76,6 @@ def get_current_date_time():
 
 
 ##########################################################################
-# Create signer
-##########################################################################
-def create_signer(cmd):
-
-    # assign default values
-    config_file = oci.config.DEFAULT_LOCATION
-    config_section = oci.config.DEFAULT_PROFILE
-
-    if cmd.config:
-        if cmd.config.name:
-            config_file = cmd.config.name
-
-    if cmd.profile:
-        config_section = cmd.profile
-
-    if cmd.instance_principals:
-        try:
-            signer = oci.auth.signers.InstancePrincipalsSecurityTokenSigner()
-            config = {'region': signer.region, 'tenancy': signer.tenancy_id}
-            return config, signer
-        except Exception:
-            print_header("Error obtaining instance principals certificate, aborting", 0)
-            raise SystemExit
-    else:
-        config = oci.config.from_file(config_file, config_section)
-        signer = oci.signer.Signer(
-            tenancy=config["tenancy"],
-            user=config["user"],
-            fingerprint=config["fingerprint"],
-            private_key_file_location=config.get("key_file"),
-            pass_phrase=oci.config.get_config_value_or_default(config, "pass_phrase"),
-            private_key_content=config.get("key_content")
-        )
-        return config, signer
-
-
-##########################################################################
 # get_secret_password
 ##########################################################################
 def get_secret_password(config, signer, proxy, secret_id):
@@ -152,7 +116,6 @@ def set_parser_arguments():
     parser.add_argument('-c', type=argparse.FileType('r'), dest='config', help="Config File")
     parser.add_argument('-t', default="", dest='profile', help='Config file section to use (tenancy profile)')
     parser.add_argument('-p', default="", dest='proxy', help='Set Proxy (i.e. www-proxy-server.com:80) ')
-    parser.add_argument('-ip', action='store_true', default=False, dest='instance_principals', help='Use Instance Principals for Authentication')
 
     parser.add_argument('-dbid', default="", dest='dbid', help='Database OCID')
     parser.add_argument('-folder', default="", dest='folder', help='Folder to extract the Wallet')
@@ -178,7 +141,7 @@ def main_process():
     cmd = set_parser_arguments()
     if cmd is None:
         exit()
-    config, signer = create_signer(cmd)
+    config, signer = oci_utils.create_signer(cmd.profile, cmd.config)
 
     wallet_zipfile = cmd.zipfile
     wallet_folder = cmd.folder

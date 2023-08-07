@@ -11,14 +11,30 @@
 # coding: utf-8
 ##########################################################################
 import oci
+import oci_utils
 import requests
 import sys
+import argparse
+
+##########################################################################
+# set parser
+##########################################################################
+def set_parser_arguments():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-c', type=argparse.FileType('r'), dest='config', help="Config File")
+    parser.add_argument('-t', default="", dest='profile', help='Config file section to use (local for instance principle)')
+    result = parser.parse_args()
+
+    return result
+
+# Get passsed args
+cmd = set_parser_arguments()
+if cmd is None:
+    exit()
 
 # Get Instance Principles Signer
-signer = oci.auth.signers.InstancePrincipalsSecurityTokenSigner()
-config = {'region': signer.region, 'tenancy': signer.tenancy_id}
-tenancy_id = signer.tenancy_id
-curr_region = signer.region
+config, signer = oci_utils.create_signer(cmd.profile, cmd.config)
 
 try:
     print("\n   Connecting to Identity Service...")
@@ -26,7 +42,7 @@ try:
     print("   Okay.")
 
     print("\n   Check Tenancy Details Access...")
-    tenancy = identity.get_tenancy(tenancy_id).data
+    tenancy = identity.get_tenancy(config['tenancy']).data
     print("   Okay.")
 
     print("\n   Get List of Regions...")
@@ -37,20 +53,20 @@ try:
     home_region_array = next(item for item in regions.data if str(item.key) == str(tenancy.home_region_key))
     home_region = str(home_region_array.name)
     print("   Home    Region = " + home_region)
-    print("   Current Region = " + curr_region)
-    if home_region == curr_region:
+    print("   Current Region = " + config['region'])
+    if home_region == config['region']:
         print("   Okay.")
     else:
         print("   Error, Installation must be in Home Region, please change to " + home_region + " and re-run the stack, Aborting...")
         sys.exit()
 
     print("\n   Check Compartment List Access...")
-    all_compartments = identity.list_compartments(tenancy_id, compartment_id_in_subtree=True).data
+    all_compartments = identity.list_compartments(config['tenancy'], compartment_id_in_subtree=True).data
     print("   Okay...")
 
     print("\n   Check Access to Cost and Usage Object Storage...")
     object_storage = oci.object_storage.ObjectStorageClient(config, signer=signer)
-    objects = object_storage.list_objects("bling", tenancy_id, fields="timeCreated,size").data
+    objects = object_storage.list_objects("bling", config['tenancy'], fields="timeCreated,size").data
     print("   Okay.")
 
     try:

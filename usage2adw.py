@@ -66,6 +66,7 @@ import sys
 import argparse
 import datetime
 import oci
+import oci_utils
 import gzip
 import os
 import csv
@@ -1940,7 +1941,7 @@ def main_process():
     cmd = set_parser_arguments()
     if cmd is None:
         exit()
-    config, signer = create_signer(cmd)
+    config, signer = oci_utils.create_signer(cmd.profile, cmd.config)
 
     ############################################
     # Start
@@ -1952,7 +1953,7 @@ def main_process():
     ############################################
     # Identity extract compartments
     ############################################
-    secret_config, secret_signer = create_secret_signer(cmd)
+    secret_config, secret_signer = oci_utils.create_signer(cmd.dsecret_profile, cmd.config)
     dbpass = get_secret_password(secret_config, secret_signer, cmd.proxy, cmd.dsecret_id)
 
     ############################################

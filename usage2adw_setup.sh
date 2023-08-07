@@ -111,7 +111,7 @@ GenerateWalletFromADB()
 
    slog=$LOGDIR/generate_adb_wallet_${DATE}.log
    echo "   Internal LOG=$slog" | tee -a $LOG
-   python3 $APPDIR/usage2adw_download_adb_wallet.py -ip -dbid $database_id -folder $WALLET_FOLDER -zipfile $WALLET -secret $database_secret_id | tee -a $LOG | tee -a $slog
+   python3 $APPDIR/usage2adw_download_adb_wallet.py -t $database_secret_tenant -dbid $database_id -folder $WALLET_FOLDER -zipfile $WALLET -secret $database_secret_id | tee -a $LOG | tee -a $slog
 
    if (( `grep Error $slog | wc -l` > 0 )); then
       echo "   Error generating Autonomous Wallet, please check the log $slog" | tee -a $LOG
@@ -153,9 +153,14 @@ ReadVariablesFromCredfile()
       exit 1
    fi
 
-   if [ -z "${DATABASE_SECRET_TENANT}" ]
+   if [ -z "${database_secret_tenant}" ]
    then
       export database_secret_tenant=local
+      echo "DATABASE_SECRET_TENANT does not exist in config file ..." | tee -a $LOG
+      echo "Please add DATABASE_SECRET_TENANT to $CREDFILE and run again" | tee -a $LOG
+      echo "DATABASE_SECRET_TENANT should be "local" if using instance principles for API authentication. If using the ~/.oci/config file it should be the name of the profile to use (ie. DEFAULT)." | tee -a $LOG
+      echo "Abort." | tee -a $LOG
+      exit 1
    fi
 
    ###################################################
@@ -205,7 +210,7 @@ SetupCredential()
    printf "Please Enter Database Name     : "; read DATABASE_NAME
    printf "Please Enter Database id (ocid): "; read DATABASE_ID
    printf "Please Enter ADB Application Secret Id from KMS Vault: "; read DATABASE_SECRET_ID
-   printf "Please Enter ADB Application Secret Tenant Profile - The Tenancy name in which the Secret Vault resides (For instance principle use 'local'):"; read DATABASE_SECRET_TENANT
+   printf "Please Enter the Name of ADB Application Secret Tenant Profile to Use from ~/.oci/config (ie. DEFAULT). - If Using Instance Principle for Authentication Enter 'local':"; read DATABASE_SECRET_TENANT
    printf "Please Enter Extract Start Date (Format YYYY-MM i.e. 2023-01): "; read EXTRACT_DATE
    printf "Please Enter Tag Key 1 to extract as Special Tag (Oracle-Tags.CreatedBy): "; read TAG_SPECIAL
    printf "Please Enter Tag Key 2 to extract as Special Tag (Oracle-Tags.Program): "; read TAG2_SPECIAL
@@ -474,10 +479,10 @@ SetupApp()
 
    slog=$LOGDIR/check_connectivity_${DATE}.log
    echo "   Internal LOG=$slog" | tee -a $LOG
-   python3 $APPDIR/usage2adw_check_connectivity.py | tee -a $slog | tee -a $LOG
+   python3 $APPDIR/usage2adw_check_connectivity.py -t $database_secret_tenant | tee -a $slog | tee -a $LOG
    if (( `grep Error $slog | wc -l` > 0 )); then
       echo "   Error querying OCI, please check the log $slog" | tee -a $LOG
-      echo "   Please check the documentation to have the dynamic group and policy correctted" | tee -a $LOG
+      echo "   Please check the documentation to have the dynamic group and policy corrected" | tee -a $LOG
       echo "   Once fixed you can rerun the script $SCRIPT" | tee -a $LOG
       echo "   Abort" | tee -a $LOG
       exit 1
@@ -488,11 +493,11 @@ SetupApp()
    ###########################################
    # create application schema and enable APEX
    ###########################################
-   echo "" | tee -a $LOG
    slog=$LOGDIR/db_creation_user_${DATE}.log
-   echo "   Internal LOG=$slog" | tee -a $LOG
-   
+   echo "" | tee -a $LOG
    echo "4. Creating USAGE user on ADWC instance and enable APEX Workspace" | tee -a $LOG
+   echo "   Internal LOG=$slog" | tee -a $LOG
+   echo "" | tee -a $LOG 
    echo "   commands executed:" | tee -a $LOG
    echo "   sqlplus ADMIN/xxxxxxxx@${db_db_name}" | tee -a $LOG
    echo "   create user usage identified by xxxxxxxxx;" | tee -a $LOG

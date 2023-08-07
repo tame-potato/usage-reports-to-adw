@@ -103,50 +103,12 @@ import oracledb
 import time
 import os
 import oci
+import oci_utils
 import base64
 
 version = "23.08.01"
 cmd = None
 file_num = 0
-
-
-##########################################################################
-# Create signer
-##########################################################################
-def create_signer(cmd):
-
-    # assign default values
-    config_file = oci.config.DEFAULT_LOCATION
-    config_section = oci.config.DEFAULT_PROFILE
-    instant_principle = True
-
-    if cmd.config:
-        if cmd.config.name:
-            config_file = cmd.config.name
-
-    if cmd.profile:
-        instant_principle = (cmd.profile == 'local')
-        config_section = cmd.profile
-
-    if instant_principle:
-        try:
-            signer = oci.auth.signers.InstancePrincipalsSecurityTokenSigner()
-            config = {'region': signer.region, 'tenancy': signer.tenancy_id}
-            return config, signer
-        except Exception:
-            print("Error obtaining instance principals certificate, aborting...")
-            raise SystemExit
-    else:
-        config = oci.config.from_file(config_file, config_section)
-        signer = oci.signer.Signer(
-            tenancy=config["tenancy"],
-            user=config["user"],
-            fingerprint=config["fingerprint"],
-            private_key_file_location=config.get("key_file"),
-            pass_phrase=oci.config.get_config_value_or_default(config, "pass_phrase"),
-            private_key_content=config.get("key_content")
-        )
-        return config, signer
 
 
 ##########################################################################
@@ -3086,7 +3048,7 @@ def main_process():
     if cmd is None:
         exit()
 
-    config, signer = create_signer(cmd)
+    config, signer = oci_utils.create_signer(cmd.profile, cmd.config)
 
     ############################################
     # Start

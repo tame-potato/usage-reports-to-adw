@@ -72,10 +72,6 @@ run_report()
         exit 1
     fi
 
-    if [ "${1}" = "local" ]; then
-        export tenant="-ip"
-    fi
-
     if [ -z "${2}" ]
     then
         TAG1=$TAG1_SPECIAL
@@ -115,7 +111,7 @@ run_report()
 ##################################
 echo "Start running at `date`..."
 
-run_report local
+run_report $DATA_BASE_SECRET_TENANT
 #run_report tenant2 tagspecial1 tagspecial2
 #run_report tenant3 tagspecial1 tagspecial2
 
