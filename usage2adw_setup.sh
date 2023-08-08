@@ -30,6 +30,7 @@ export WALLET=$HOME/wallet.zip
 export WALLET_FOLDER=$HOME/ADWCUSG
 export DATE=`date '+%Y%m%d_%H%M%S'`
 export GIT=https://raw.githubusercontent.com/oracle-samples/usage-reports-to-adw/main
+export OCIFILE=$HOME/.oci/config
 
 # Env Variables for database connectivity
 export CLIENT_HOME=/usr/lib/oracle/current/client64
@@ -157,10 +158,10 @@ ReadVariablesFromCredfile()
    then
       export database_secret_tenant=local
       echo "DATABASE_SECRET_TENANT does not exist in config file ..." | tee -a $LOG
-      echo "Please add DATABASE_SECRET_TENANT to $CREDFILE and run again" | tee -a $LOG
-      echo "DATABASE_SECRET_TENANT should be "local" if using instance principles for API authentication. If using the ~/.oci/config file it should be the name of the profile to use (ie. DEFAULT)." | tee -a $LOG
-      echo "Abort." | tee -a $LOG
-      exit 1
+      echo "Please add DATABASE_SECRET_TENANT to $CREDFILE" | tee -a $LOG
+      echo "DATABASE_SECRET_TENANT should be 'local' if using instance principles for API authentication. If using the $OCIFILE file it should be the name of the profile to use (ie. DEFAULT)." | tee -a $LOG
+      echo "Defaulting to DATABASE_SECRET_TENANT='local'" | tee -a $LOG
+      export database_secret_tenant=local
    fi
 
    ###################################################
@@ -210,7 +211,7 @@ SetupCredential()
    printf "Please Enter Database Name     : "; read DATABASE_NAME
    printf "Please Enter Database id (ocid): "; read DATABASE_ID
    printf "Please Enter ADB Application Secret Id from KMS Vault: "; read DATABASE_SECRET_ID
-   printf "Please Enter the Name of ADB Application Secret Tenant Profile to Use from ~/.oci/config (ie. DEFAULT). - If Using Instance Principle for Authentication Enter 'local':"; read DATABASE_SECRET_TENANT
+   printf "Please Enter the Name of ADB Application Secret Tenant Profile to Use from $OCIFILE (ie. DEFAULT). - If Using Instance Principal for Authentication Enter 'local':"; read DATABASE_SECRET_TENANT
    printf "Please Enter Extract Start Date (Format YYYY-MM i.e. 2023-01): "; read EXTRACT_DATE
    printf "Please Enter Tag Key 1 to extract as Special Tag (Oracle-Tags.CreatedBy): "; read TAG_SPECIAL
    printf "Please Enter Tag Key 2 to extract as Special Tag (Oracle-Tags.Program): "; read TAG2_SPECIAL
@@ -233,6 +234,12 @@ SetupCredential()
    echo "" | tee -a $LOG
    echo "Setup Credentials Completed." | tee -a $LOG
    echo "" | tee -a $LOG
+
+   if [ $DATABASE_SECRET_TENANT != "local" ] && [ ! -f $OCIFILE ]; then
+         echo -e "\e[1;33mYou did not select "local" (instance principals authentication) and an OCI config file at $OCIFILE was not found. For API aunthentication without instance principals the Secret Tenant Profile must match a profile declared within the $OCIFILE file.\e[0m"
+         echo -e "\e[1;33mYou can read more about the OCI config file at https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm.\e[0m"
+         echo -e "\e[1;33mIt is recommended you install the OCI CLI and run 'oci setup config' to generate an OCI config file.\e[0m"
+   fi
 
 }
 
