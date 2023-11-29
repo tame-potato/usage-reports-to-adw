@@ -84,11 +84,13 @@ More information can be found at [usagereportsoverview.htm](https://docs.cloud.o
 - OCI_COST_REFERENCE - Reference table of the cost filter keys - SERVICE, REGION, COMPARTMENT, PRODUCT, SUBSCRIPTION
 - OCI_PRICE_LIST - Has the price list and the cost per product
 - OCI_LOAD_STATUS - Has the load file statistics
+- OCI_TENANT - Has the display name of the child tenants (Manual Update)
+- OCI_INTERNAL_COST - Used for internal rate cards
 
 ## 3rd Party Dependencies including tested versions
 
-- Python 3.9.13_2
-- oracledb 1.3.0
+- Python 3.9.16
+- oracledb 1.3.2
 - requests 2.31.0
 - OCI Python SDK 2.107.0
 

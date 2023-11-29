@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 ##########################################################################
-# Copyright (c) 2023, Oracle and/or its affiliates.                                                       
-# Licensed under the Universal Permissive License v 1.0 as shown at  https://oss.oracle.com/licenses/upl/ 
+# Copyright (c) 2023, Oracle and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at  https://oss.oracle.com/licenses/upl/
 #
 # check_connectivity.py - to check if policies granted the proper roles
 # @author: Adi Zohar
@@ -13,7 +13,6 @@
 import oci
 import oci_utils
 import requests
-import sys
 import argparse
 
 ##########################################################################
@@ -57,14 +56,16 @@ try:
     if home_region == config['region']:
         print("   Okay.")
     else:
-        print("   Error, Installation must be in Home Region, please change to " + home_region + " and re-run the stack, Aborting...")
-        sys.exit()
+        print("   Okay. But recommend to install it at Home Region, home region " + home_region + ".")
 
     print("\n   Check Compartment List Access...")
     all_compartments = identity.list_compartments(config['tenancy'], compartment_id_in_subtree=True).data
     print("   Okay...")
 
     print("\n   Check Access to Cost and Usage Object Storage...")
+    signer.region = home_region
+    config['region'] = home_region
+
     object_storage = oci.object_storage.ObjectStorageClient(config, signer=signer)
     objects = object_storage.list_objects("bling", config['tenancy'], fields="timeCreated,size").data
     print("   Okay.")

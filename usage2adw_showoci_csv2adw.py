@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 ##########################################################################
-# Copyright (c) 2023, Oracle and/or its affiliates.                                                       
-# Licensed under the Universal Permissive License v 1.0 as shown at  https://oss.oracle.com/licenses/upl/ 
+# Copyright (c) 2023, Oracle and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at  https://oss.oracle.com/licenses/upl/
 #
 # usage2adw_showoci_csv2adw.py
 #
@@ -106,7 +106,7 @@ import oci
 import oci_utils
 import base64
 
-version = "23.08.01"
+version = "23.10.19"
 cmd = None
 file_num = 0
 
@@ -133,12 +133,12 @@ def get_secret_password(config, signer, proxy, secret_id):
         return secret_text
 
     except oci.exceptions.ServiceError as e:
-        print("\ServiceError retrieving secret at get_secret_password !")
+        print("\nServiceError retrieving secret at get_secret_password !")
         print("\n" + str(e) + "\n")
         raise SystemExit
 
     except Exception as e:
-        print("\Exception retrieving secret at get_secret_password !")
+        print("\nException retrieving secret at get_secret_password !")
         print("\n" + str(e) + "\n")
         raise SystemExit
 
@@ -257,8 +257,8 @@ def handle_compute(connection):
                 {'col': 'status                ', 'csv': '    ', 'type': 'varchar2(100) ', 'pk': 'n'},
                 {'col': 'type                  ', 'csv': '    ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'image                 ', 'csv': '    ', 'type': 'varchar2(1000)', 'pk': 'n'},
-                {'col': 'primary_vcn           ', 'csv': '    ', 'type': 'varchar2(100) ', 'pk': 'n'},
-                {'col': 'primary_subnet        ', 'csv': '    ', 'type': 'varchar2(100) ', 'pk': 'n'},
+                {'col': 'primary_vcn           ', 'csv': '    ', 'type': 'varchar2(1000)', 'pk': 'n'},
+                {'col': 'primary_subnet        ', 'csv': '    ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'shape                 ', 'csv': '    ', 'type': 'varchar2(100) ', 'pk': 'n'},
                 {'col': 'ocpus                 ', 'csv': '    ', 'type': 'number        ', 'pk': 'n'},
                 {'col': 'memory_gb             ', 'csv': '    ', 'type': 'number        ', 'pk': 'n'},
@@ -1014,7 +1014,7 @@ def handle_load_balancer_listeners(connection):
                 {'col': 'tenant_name        ', 'csv': '     ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'tenant_id          ', 'csv': '     ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'id                 ', 'csv': '     ', 'type': 'varchar2(1000)', 'pk': 'y'},
-                {'col': 'loadbalancer_id    ', 'csv': '     ', 'type': 'varchar2(1000)', 'pk': 'y'},
+                {'col': 'loadbalancer_id    ', 'csv': '     ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'region_name        ', 'csv': '     ', 'type': 'varchar2(100) ', 'pk': 'n'},
                 {'col': 'compartment_path   ', 'csv': '     ', 'type': 'varchar2(2000)', 'pk': 'n'},
                 {'col': 'compartment_name   ', 'csv': '     ', 'type': 'varchar2(1000)', 'pk': 'n'},
@@ -1428,7 +1428,6 @@ def handle_network_vcn(connection):
                 {'col': 'compartment              ', 'csv': '             ', 'type': 'varchar2(2000)', 'pk': 'n'},
                 {'col': 'compartment_path         ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'name                     ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
-                {'col': 'cidr                     ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'cidrs                    ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
                 {'col': 'internet_gateway         ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'service_gateway          ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
@@ -1464,7 +1463,6 @@ def handle_network_subnet(connection):
                 {'col': 'vcn_compartment          ', 'csv': '             ', 'type': 'varchar2(2000)', 'pk': 'n'},
                 {'col': 'vcn_compartment_path     ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'vcn_name                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
-                {'col': 'vcn_cidr                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'vcn_cidrs                ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
                 {'col': 'internet_gateway         ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'service_gateway          ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
@@ -1511,7 +1509,6 @@ def handle_network_subnet_private_ips(connection):
                 {'col': 'vcn_compartment          ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'vcn_compartment_path     ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
                 {'col': 'vcn_name                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
-                {'col': 'vcn_cidr                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'vcn_cidrs                ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
                 {'col': 'subnet_name              ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'subnet_cidr              ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
@@ -1555,7 +1552,6 @@ def handle_network_security_list(connection):
                 {'col': 'vcn_compartment          ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'vcn_compartment_path     ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
                 {'col': 'vcn_name                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
-                {'col': 'vcn_cidr                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'vcn_cidrs                ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
                 {'col': 'sec_name                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'sec_compartment          ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
@@ -1591,7 +1587,6 @@ def handle_network_security_groups(connection):
                 {'col': 'vcn_compartment          ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'vcn_compartment_path     ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
                 {'col': 'vcn_name                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
-                {'col': 'vcn_cidr                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'vcn_cidrs                ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
                 {'col': 'sec_name                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'sec_compartment          ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
@@ -1698,7 +1693,6 @@ def handle_network_dhcp_options(connection):
                 {'col': 'vcn_compartment          ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'vcn_compartment_path     ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
                 {'col': 'vcn_name                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
-                {'col': 'vcn_cidr                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'vcn_cidrs                ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
                 {'col': 'dhcp_name                ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'option_1                 ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
@@ -1732,7 +1726,6 @@ def handle_network_routes(connection):
                 {'col': 'vcn_compartment          ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'vcn_compartment_path     ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
                 {'col': 'vcn_name                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
-                {'col': 'vcn_cidr                 ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'vcn_cidrs                ', 'csv': '             ', 'type': 'varchar2(4000)', 'pk': 'n'},
                 {'col': 'route_name               ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
                 {'col': 'route_compartment        ', 'csv': '             ', 'type': 'varchar2(1000)', 'pk': 'n'},
@@ -2936,22 +2929,34 @@ def handle_table(connection, inputdata, resource_id="", resource_name="", resour
 
                 data = []
                 for row in csv_reader:
+                    primary_key_has_data = True
                     rowarray = []
+
                     for item in inputdata['items']:
                         column = str(item['csv']).strip()
                         if not column:
                             column = str(item['col']).strip()
                         limit_size = 16 if 'date' in item['type'] else 3999
                         value = get_column_value_from_array(column, row, limit_size)
+
+                        # check if primary key is null
+                        if item['pk'] == 'y' and not value:
+                            primary_key_has_data = False
+
+                        # Add col data to the collection
                         rowarray.append(value)
-                    data.append(tuple(rowarray))
-                    num_rows += 1
+
+                    # add row only if pk is  not null
+                    if primary_key_has_data:
+                        data.append(tuple(rowarray))
+                        num_rows += 1
 
                     # executemany every batch size
                     process_location = "before executemany"
-                    if len(data) % batch_size == 0:
-                        cursor.executemany(sql, data)
-                        data = []
+                    if data:
+                        if len(data) % batch_size == 0:
+                            cursor.executemany(sql, data)
+                            data = []
 
                 # if data exist final execute
                 if data:

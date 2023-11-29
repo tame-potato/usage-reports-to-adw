@@ -19,7 +19,7 @@
 source ~/.bashrc > /dev/null 2>&1
 
 # Application Variables
-export VERSION=23.08.01
+export VERSION=23.12.01
 export APPDIR=/home/opc/usage_reports_to_adw
 export CREDFILE=$APPDIR/config.user
 export LOGDIR=$APPDIR/log
@@ -176,7 +176,7 @@ ReadVariablesFromCredfile()
       exit 1
    fi
    rm -f $log
-   export db_app_password=`python3 ${APPDIR}/usage2adw_retrieve_secret.py -t $database_secret_tenant -secret $database_secret_id | grep "^Secret=" | sed -s 's/Secret=//'`
+   export db_app_password=`python3 ${APPDIR}/usage2adw_retrieve_secret.py -t $database_secret_tenant -secret $database_secret_id | grep "^Value=" | sed -s 's/Value=//'`
 
    if [ -z "${db_app_password}" ]
    then
@@ -491,8 +491,8 @@ SetupApp()
       echo "   Error querying OCI, please check the log $slog" | tee -a $LOG
       echo "   Please check the documentation to have the dynamic group and policy corrected" | tee -a $LOG
       echo "   Once fixed you can rerun the script $SCRIPT" | tee -a $LOG
-      echo "   Abort" | tee -a $LOG
-      exit 1
+      echo "" | tee -a $LOG
+      echo "   Script will continue incase creating the database on different tenant or child tenant..." | tee -a $LOG
    else
       echo "   Okay." | tee -a $LOG
    fi
@@ -532,6 +532,37 @@ SetupApp()
    echo "5. Create Usage2ADW Tables" | tee -a $LOG
    echo "   Internal LOG=$slog" | tee -a $LOG
    echo "set echo on serveroutput on time on lines 199 trimsp on pages 1000 verify off
+   
+   -------------------------------
+   -- OCI_TENANT
+   -------------------------------
+   prompt Creating Table OCI_INTERNAL_COST
+
+   create table OCI_INTERNAL_COST (
+      RESOURCE_NAME       VARCHAR2(100) NOT NULL,
+      SERVICE_NAME        VARCHAR2(100),
+      BILLED_USAGE_UNIT   VARCHAR2(100),
+      CONSUMED_MEASURE    VARCHAR2(100),
+      RESOURCE_UNITS      VARCHAR2(100),
+      UNIT_COST           NUMBER,
+      CONVERSION_FACTOR   NUMBER,
+      EXIST_IN_FINANCE    CHAR(1),
+      CONVERSION_NOTES    VARCHAR2(500),
+      CONSTRAINT OCI_INTERNAL_COST_PK PRIMARY KEY (RESOURCE_NAME,BILLED_USAGE_UNIT) USING INDEX ENABLE
+   );
+   -------------------------------
+   -- OCI_TENANT
+   -------------------------------
+   prompt Creating Table OCI_TENANT
+
+   create table OCI_TENANT (
+      TENANT_ID               VARCHAR2(100),
+      TENANT_NAME             VARCHAR2(100),
+      ADMIN_EMAIL             VARCHAR2(100),
+      INFORMATION             VARCHAR2(1000),
+      CONSTRAINT OCI_TENANT_PK PRIMARY KEY (TENANT_ID) USING INDEX
+   );
+
    -------------------------------
    -- OCI_USAGE
    -------------------------------
@@ -806,31 +837,37 @@ DropTables()
    select to_char(sysdate,'YYYY-MM-DD HH24:MI') current_date from dual;
 
    prompt Dropping Table OCI_USAGE
-   drop table usage.OCI_USAGE ;
+   drop table OCI_USAGE ;
+
+   prompt Dropping Table OCI_INTERNAL_COST
+   drop table OCI_INTERNAL_COST ;
+
+   prompt Dropping Table OCI_TENANT
+   drop table OCI_TENANT ;
 
    prompt Dropping Table OCI_USAGE_STATS
-   drop table usage.OCI_USAGE_STATS ;
+   drop table OCI_USAGE_STATS ;
 
    prompt Dropping Table OCI_USAGE_TAG_KEYS
-   drop table usage.OCI_USAGE_TAG_KEYS ;
+   drop table OCI_USAGE_TAG_KEYS ;
 
    prompt Dropping Table OCI_COST
-   drop table usage.OCI_COST;
+   drop table OCI_COST;
 
    prompt Dropping Table OCI_COST_STATS
-   drop table usage.OCI_COST_STATS;
+   drop table OCI_COST_STATS;
 
    prompt Dropping Table OCI_COST_TAG_KEYS
-   drop table usage.OCI_COST_TAG_KEYS ;
+   drop table OCI_COST_TAG_KEYS ;
 
    prompt Dropping Table OCI_COST_REFERENCE
-   drop table usage.OCI_COST_REFERENCE;
+   drop table OCI_COST_REFERENCE;
 
    prompt Dropping Table OCI_PRICE_LIST
-   drop table usage.OCI_PRICE_LIST;
+   drop table OCI_PRICE_LIST;
 
    prompt Dropping Table OCI_LOAD_STATUS
-   drop table usage.OCI_LOAD_STATUS; 
+   drop table OCI_LOAD_STATUS; 
 
 " | sqlplus -s USAGE/${db_app_password}@${db_db_name} | tee -a $slog | tee -a $LOG
 
@@ -870,32 +907,38 @@ TruncateTables()
    echo "set echo on serveroutput on time on lines 199 trimsp on pages 1000 verify off
    select to_char(sysdate,'YYYY-MM-DD HH24:MI') current_date from dual;
 
+   prompt Truncating Table OCI_TENANT
+   truncate table OCI_TENANT ;
+
    prompt Truncating Table OCI_USAGE
-   truncate table usage.OCI_USAGE ;
+   truncate table OCI_USAGE ;
 
    prompt Truncating Table OCI_USAGE_STATS
-   truncate table usage.OCI_USAGE_STATS ;
+   truncate table OCI_USAGE_STATS ;
 
    prompt Truncating Table OCI_USAGE_TAG_KEYS
-   truncate table usage.OCI_USAGE_TAG_KEYS ;
+   truncate table OCI_USAGE_TAG_KEYS ;
 
    prompt Truncating Table OCI_COST
-   truncate table usage.OCI_COST;
+   truncate table OCI_COST;
 
    prompt Truncating Table OCI_COST_STATS
-   truncate table usage.OCI_COST_STATS;
+   truncate table OCI_COST_STATS;
 
    prompt Truncating Table OCI_COST_TAG_KEYS
-   truncate table usage.OCI_COST_TAG_KEYS ;
+   truncate table OCI_COST_TAG_KEYS ;
 
    prompt Truncating Table OCI_COST_REFERENCE
-   truncate table usage.OCI_COST_REFERENCE;
+   truncate table OCI_COST_REFERENCE;
 
    prompt Truncating Table OCI_PRICE_LIST
-   truncate table usage.OCI_PRICE_LIST;
+   truncate table OCI_PRICE_LIST;
 
    prompt Truncating Table OCI_LOAD_STATUS
-   truncate table usage.OCI_LOAD_STATUS; 
+   truncate table OCI_LOAD_STATUS; 
+
+   prompt Truncating Table OCI_INTERNAL_COST
+   truncate table OCI_INTERNAL_COST; 
 
 " | sqlplus -s USAGE/${db_app_password}@${db_db_name} | tee -a $slog | tee -a $LOG
 
