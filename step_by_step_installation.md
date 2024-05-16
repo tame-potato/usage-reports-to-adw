@@ -33,7 +33,7 @@ Copy Instance Info:
 ## 2. Create Dynamic Group for Instance Principles
 
 ```
-OCI -> Menu -> Identity -> Dynamic Groups -> Create Dynamic Group
+OCI -> Menu -> Identity -> Default Domain -> Dynamic Groups -> Create Dynamic Group
 --> Name = UsageDownloadGroup 
 --> Desc = Dynamic Group for the Usage Report VM
 --> Rule 1 = ANY { instance.id = 'OCID_Of_Step_1_Instance' }
@@ -163,7 +163,7 @@ Password = Password you defined for the application
 Please Visit [How To File](step_by_step_howto.md)
 
 
-## License                                                                                              
-                                                                                                        
-Copyright (c) 2023, Oracle and/or its affiliates.                                                       
+## License
+
+Copyright (c) 2024, Oracle and/or its affiliates.
 Licensed under the Universal Permissive License v 1.0 as shown at  https://oss.oracle.com/licenses/upl/ 
