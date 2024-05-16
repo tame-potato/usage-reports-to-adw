@@ -1,2 +1,5 @@
 # Untracked files
 __pycache__/
+report/
+log/
+config.user
