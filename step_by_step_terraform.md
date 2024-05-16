@@ -91,7 +91,7 @@ Option to tag the resources
    - APPCOMP is the compartment where the usage2adw will be installed
      
      Dynamic Group:
-         OCI -> Menu -> Identity -> Dynamic Groups -> Create Dynamic Group
+         OCI -> Menu -> Identity -> Default Domain -> Dynamic Groups -> Create Dynamic Group
          --> Name = UsageDownloadGroup 
          --> Desc = Dynamic Group for the Usage Report Compartment
          --> Rule 1 = ANY { instance.compartment.id = 'OCID_Of_Compartment' }
@@ -239,7 +239,7 @@ Password = Password you defined for the application
 Please Visit [How To File](step_by_step_howto.md)
 
 
-## License                                                                                              
-                                                                                                        
-Copyright (c) 2023, Oracle and/or its affiliates.                                                       
+## License
+
+Copyright (c) 2024, Oracle and/or its affiliates.
 Licensed under the Universal Permissive License v 1.0 as shown at  https://oss.oracle.com/licenses/upl/ 
